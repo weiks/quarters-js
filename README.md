@@ -1,1 +1,3 @@
-# Quarters.js
+# quarters-js
+
+The Quarters JS SDK
