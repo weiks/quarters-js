@@ -17,15 +17,15 @@
       data: {
         quarters: new Quarters('test', 'test', {
           quartersURL: 'http://localhost:3000',
-          apiURL: 'http://localhost:3000'
+          apiURL: 'http://localhost:3000/'
         })
       },
       methods: {
         login: function() {
           this.quarters.authorize({
             success: function (data) {
-              console.log(data);
-            },
+              this.quarters.oauthToken(data.code)
+            }.bind(this),
             // redirect: true
           })
         }

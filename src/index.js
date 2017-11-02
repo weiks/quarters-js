@@ -26,12 +26,12 @@ export default class Quarters {
       quartersURL: quartersURL,
       redirectURL: `${quartersURL}/oauth/javascript_sdk_redirect`,
       oauthURL: options.oauthURL || `${quartersURL}/oauth`,
-      apiURL: options.apiURL || 'https://api.pocketfulofquarters.com'
+      apiURL: options.apiURL || 'https://api.pocketfulofquarters.com/'
     }
 
     // axios object
     this.axiosObject = axios.create({
-      baseURL: this.options.baseURL
+      baseURL: this.options.apiURL
     })
   }
 
@@ -46,7 +46,9 @@ export default class Quarters {
     const oauthURL = this.options.oauthURL
     const url = `${oauthURL}/authorize?response_type=code&key=${this.appKey}`
     if (options.redirect) {
-      const redirectURI = encodeURIComponent(`${location.protocol}//${location.host}${location.pathname}`)
+      const redirectURI = encodeURIComponent(
+        `${location.protocol}//${location.host}${location.pathname}`
+      )
       window.location.href = `${url}&redirect_uri=${redirectURI}`
     } else {
       // receive message from popup
@@ -66,15 +68,24 @@ export default class Quarters {
     }
   }
 
-  requestAuthToken(refreshToken) {
+  _authToken(token, isRefreshToken) {
     const data = {
-      refreshToken: refreshToken
+      client_id: this.appKey,
+      client_secret: this.appSecret
     }
 
-    return axios.post('/auth-token', data).then(apiToken => {
+    if (isRefreshToken) {
+      data.grant_type = 'refresh_token'
+      data.refresh_token = token
+    } else {
+      data.grant_type = 'authorization_code'
+      data.code = token
+    }
+
+    return this.axiosObject.post('/oauth/token', data).then(apiToken => {
       // store apiToken in browser
-      axios.create({
-        baseURL: this.baseURL,
+      this.axiosObject = axios.create({
+        baseURL: this.options.apiURL,
         headers: {
           Authorization: `Token ${apiToken}`
         }
@@ -82,24 +93,12 @@ export default class Quarters {
     })
   }
 
-  login(authToken) {
-    if (!authToken) {
-      throw new Error('Auth token is required!')
-    }
+  oauthToken(code) {
+    return this._authToken(code)
+  }
 
-    const data = {
-      authToken: authToken
-    }
-
-    return axios.post('/login', data).then(apiToken => {
-      // store apiToken in browser
-      this.axiosObject = axios.create({
-        baseURL: this.baseURL,
-        headers: {
-          Authorization: `Token ${apiToken}`
-        }
-      })
-    })
+  authToken(refreshToken) {
+    return this._authToken(refreshToken, true)
   }
 
   requestTransfer(tokens) {
