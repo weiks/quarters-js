@@ -157,18 +157,24 @@ export default class Quarters {
       })
   }
 
-  requestTransfer(tokens) {
-    const data = {
-      tokens
+  // user details
+  me() {
+    return this.axiosObject.get('/me').then(response => response.data)
+  }
+
+  // request transfer from quarter server
+  requestTransfer(data) {
+    if (!data.tokens) {
+      throw new Error('`tokens` value is required')
+    }
+
+    const payload = {
+      tokens: parseInt(data.tokens)
     }
 
     // request tokens
-    return this.axiosObject.post('/request-tokens', data).then(response => {
-      // success
-    })
-  }
-
-  me() {
-    return this.axiosObject.get('/me').then(response => response.data)
+    return this.axiosObject
+      .post('/requests', payload)
+      .then(response => response.data)
   }
 }

@@ -10,6 +10,7 @@
     <div id="app">
       <button v-on:click="login">Login with Quarters</button>
       <button v-on:click="reftoken">Use refresh token</button>
+      <button v-on:click="requestTransfer">Request 100 tokens</button>
     </div>
   </body>
   <script type="text/javascript">
@@ -38,10 +39,20 @@
     reftoken: function() {
       const rf =
         '08445dcabd2e6af230d0f564309e4180e263cb085fbda9a904b6ea44aa43f36376e81fbe5e6b8a045802c70eb1e153c4cf51191e88656ae4002c777ef9da67168f87645ed11432d4575cec7200b556c4420f98721d3b71457becfda72bc43f25070806cf545bbb3b59e8779fbba0c698e15fce1af25f650c52137f1a9c6fa854'
-      this.quarters.setRefreshToken(rf).then(response => {
-        return this.quarters.me().then(user => {
-          console.log(user)
-        })
+      return this.quarters.setRefreshToken(rf).then(data => {
+        console.log(data)
+      })
+    },
+
+    requestTransfer: function() {
+      this.reftoken().then(() => {
+        this.quarters
+          .requestTransfer({
+            tokens: 100
+          })
+          .then(t => {
+            console.log(t)
+          })
       })
     }
   }
