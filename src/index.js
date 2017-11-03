@@ -38,12 +38,41 @@ export default class Quarters {
       headers: {}
     }
 
+    let intercept = null
     if (apiToken) {
       options.headers['Authorization'] = `Bearer ${apiToken}`
+      intercept = true
     }
 
     // store apiToken in browser
-    return axios.create(options)
+    const obj = axios.create(options)
+    if (intercept) {
+      // intercept response to check if 401 (Unauthorized with code 'token-expired')
+      obj.interceptors.response.use(
+        response => {
+          return response
+        },
+        error => {
+          const orgRequest = error.config
+          if (
+            error.response.status === 401 &&
+            error.response.data &&
+            error.response.data.code === 'token-expired' &&
+            !orgRequest._retry
+          ) {
+            orgRequest._retry = true
+            this.refreshAccessToken().then(data => {
+              const {access_token} = data // eslint-disable-line
+              orgRequest.headers['Authorization'] = `Bearer ${access_token}` // eslint-disable-line
+              return axios(orgRequest)
+            })
+          }
+          return Promise.reject(error)
+        }
+      )
+    }
+
+    return obj
   }
 
   /**
@@ -100,12 +129,23 @@ export default class Quarters {
 
   setRefreshToken(refreshToken) {
     this.refreshToken = refreshToken
+    return this.refreshAccessToken()
+  }
+
+  getRefreshToken() {
+    return this.refreshToken
+  }
+
+  refreshAccessToken() {
+    if (!this.refreshToken) {
+      throw new Error('Refresh token not found')
+    }
 
     const data = {
       client_id: this.options.appKey,
       client_secret: this.options.appSecret,
       grant_type: 'refresh_token',
-      refresh_token: refreshToken
+      refresh_token: this.refreshToken
     }
 
     return axios
@@ -115,10 +155,6 @@ export default class Quarters {
         this.axiosObject = this._getAxiosObject(access_token)
         return response.data
       })
-  }
-
-  getRefreshToken() {
-    return this.refreshToken
   }
 
   requestTransfer(tokens) {
