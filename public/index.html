@@ -5,31 +5,46 @@
     <title>Quarters SDK</title>
   </head>
   <script src="https://unpkg.com/vue" charset="utf-8"></script>
-  <script src="../lib/Quarters.min.js" charset="utf-8"></script>
+  <script src="../lib/Quarters.js" charset="utf-8"></script>
   <body>
     <div id="app">
       <button v-on:click="login">Login with Quarters</button>
+      <button v-on:click="reftoken">Use refresh token</button>
     </div>
   </body>
   <script type="text/javascript">
-    new Vue({
-      el: '#app',
-      data: {
-        quarters: new Quarters('test', 'test', {
-          quartersURL: 'http://localhost:3000',
-          apiURL: 'http://localhost:3000/'
-        })
-      },
-      methods: {
-        login: function() {
-          this.quarters.authorize({
-            success: function (data) {
-              this.quarters.oauthToken(data.code)
-            }.bind(this),
-            // redirect: true
-          })
-        }
-      }
+  new Vue({
+  el: '#app',
+  data: {
+    quarters: new Quarters({
+      appKey: 'quarters-sdk',
+      appSecret: 'quarter-123456',
+      quartersURL: 'http://localhost:3000',
+      apiURL: 'http://localhost:8888/v1/'
     })
-  </script>
+  },
+  methods: {
+    login: function() {
+      this.quarters.authorize({
+        success: function(data) {
+          this.quarters.setAuthCode(data.code).then(response => {
+            return this.quarters.me()
+          })
+        }.bind(this)
+        // redirect: true
+      })
+    },
+
+    reftoken: function() {
+      const rf =
+        '08445dcabd2e6af230d0f564309e4180e263cb085fbda9a904b6ea44aa43f36376e81fbe5e6b8a045802c70eb1e153c4cf51191e88656ae4002c777ef9da67168f87645ed11432d4575cec7200b556c4420f98721d3b71457becfda72bc43f25070806cf545bbb3b59e8779fbba0c698e15fce1af25f650c52137f1a9c6fa854'
+      this.quarters.setRefreshToken(rf).then(response => {
+        return this.quarters.me().then(user => {
+          console.log(user)
+        })
+      })
+    }
+  }
+})
+</script>
 </html>

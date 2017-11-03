@@ -8,31 +8,42 @@ const openPopup = (url, width = 850, height = 600) => {
 }
 
 export default class Quarters {
-  constructor(appKey, appSecret, options = {}) {
-    if (!appKey) {
+  constructor(options = {}) {
+    if (!options.appKey) {
       throw new Error('APP KEY is required.')
     }
 
-    if (!appSecret) {
+    if (!options.appSecret) {
       throw new Error('APP SECRET is required.')
     }
-
-    this.appKey = appKey
-    this.appSecret = appSecret
 
     // options
     const quartersURL = options.quartersURL || 'https://pocketfulofquarters.com'
     this.options = {
+      appKey: options.appKey,
+      appSecret: options.appSecret,
       quartersURL: quartersURL,
       redirectURL: `${quartersURL}/oauth/javascript_sdk_redirect`,
-      oauthURL: options.oauthURL || `${quartersURL}/oauth`,
+      oauthURL: options.oauthURL || quartersURL,
       apiURL: options.apiURL || 'https://api.pocketfulofquarters.com/'
     }
 
     // axios object
-    this.axiosObject = axios.create({
-      baseURL: this.options.apiURL
-    })
+    this.axiosObject = this._getAxiosObject()
+  }
+
+  _getAxiosObject(apiToken) {
+    const options = {
+      baseURL: this.options.apiURL,
+      headers: {}
+    }
+
+    if (apiToken) {
+      options.headers['Authorization'] = `Bearer ${apiToken}`
+    }
+
+    // store apiToken in browser
+    return axios.create(options)
   }
 
   /**
@@ -44,7 +55,8 @@ export default class Quarters {
    */
   authorize(options = {}) {
     const oauthURL = this.options.oauthURL
-    const url = `${oauthURL}/authorize?response_type=code&key=${this.appKey}`
+    const url = `${oauthURL}/oauth/authorize?response_type=code&client_id=${this
+      .options.appKey}`
     if (options.redirect) {
       const redirectURI = encodeURIComponent(
         `${location.protocol}//${location.host}${location.pathname}`
@@ -68,37 +80,45 @@ export default class Quarters {
     }
   }
 
-  _authToken(token, isRefreshToken) {
+  setAuthCode(code) {
     const data = {
-      client_id: this.appKey,
-      client_secret: this.appSecret
+      client_id: this.options.appKey,
+      client_secret: this.options.appSecret,
+      grant_type: 'authorization_code',
+      code: code
     }
 
-    if (isRefreshToken) {
-      data.grant_type = 'refresh_token'
-      data.refresh_token = token
-    } else {
-      data.grant_type = 'authorization_code'
-      data.code = token
-    }
-
-    return this.axiosObject.post('/oauth/token', data).then(apiToken => {
-      // store apiToken in browser
-      this.axiosObject = axios.create({
-        baseURL: this.options.apiURL,
-        headers: {
-          Authorization: `Token ${apiToken}`
-        }
+    return axios
+      .post(`${this.options.apiURL}oauth/token`, data)
+      .then(response => {
+        const {access_token, refresh_token} = response.data
+        this.refreshToken = refresh_token //  eslint-disable-line
+        this.axiosObject = this._getAxiosObject(access_token)
+        return response.data
       })
-    })
   }
 
-  oauthToken(code) {
-    return this._authToken(code)
+  setRefreshToken(refreshToken) {
+    this.refreshToken = refreshToken
+
+    const data = {
+      client_id: this.options.appKey,
+      client_secret: this.options.appSecret,
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken
+    }
+
+    return axios
+      .post(`${this.options.apiURL}oauth/token`, data)
+      .then(response => {
+        const {access_token} = response.data
+        this.axiosObject = this._getAxiosObject(access_token)
+        return response.data
+      })
   }
 
-  authToken(refreshToken) {
-    return this._authToken(refreshToken, true)
+  getRefreshToken() {
+    return this.refreshToken
   }
 
   requestTransfer(tokens) {
@@ -107,12 +127,12 @@ export default class Quarters {
     }
 
     // request tokens
-    return this.axiosObject.post('/request-tokens', data).then(token => {
+    return this.axiosObject.post('/request-tokens', data).then(response => {
       // success
     })
   }
 
   me() {
-    return this.axiosObject.get('/me')
+    return this.axiosObject.get('/me').then(response => response.data)
   }
 }
