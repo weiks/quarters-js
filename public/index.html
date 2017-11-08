@@ -2,60 +2,250 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Quarters SDK</title>
+    <title>Quarters SDK Test</title>
   </head>
-  <script src="https://unpkg.com/vue" charset="utf-8"></script>
-  <script src="../lib/Quarters.js" charset="utf-8"></script>
+  <style media="screen">
+  .loader {
+    border: 3px solid black;
+    border-top: 3px solid #CCC;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
+  <script src="/Quarters.min.js" charset="utf-8"></script>
   <body>
-    <div id="app">
-      <button v-on:click="login">Login with Quarters</button>
-      <button v-on:click="reftoken">Use refresh token</button>
-      <button v-on:click="requestTransfer">Request 100 tokens</button>
+    <div class="container">
+      <div class="row">
+        <div id="app">
+        </div>
+      </div>
     </div>
   </body>
-  <script type="text/javascript">
-  new Vue({
-  el: '#app',
-  data: {
-    quarters: new Quarters({
-      appKey: 'quarters-sdk',
-      appSecret: 'quarter-123456',
-      quartersURL: 'http://localhost:3000',
-      apiURL: 'http://localhost:8888/v1/'
-    })
-  },
-  methods: {
-    login: function() {
-      this.quarters.authorize({
-        success: function(data) {
-          this.quarters.setAuthCode(data.code).then(response => {
-            return this.quarters.me()
-          })
-        }.bind(this)
-        // redirect: true
-      })
-    },
 
-    reftoken: function() {
-      const rf =
-        '08445dcabd2e6af230d0f564309e4180e263cb085fbda9a904b6ea44aa43f36376e81fbe5e6b8a045802c70eb1e153c4cf51191e88656ae4002c777ef9da67168f87645ed11432d4575cec7200b556c4420f98721d3b71457becfda72bc43f25070806cf545bbb3b59e8779fbba0c698e15fce1af25f650c52137f1a9c6fa854'
-      return this.quarters.setRefreshToken(rf).then(data => {
-        console.log(data)
-      })
-    },
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script type="text/babel">
+  const openPopup = (url, width = 850, height = 600) => {
+  const left = (screen.width - width) / 2
+  const top = (screen.height - height) / 4
+  const params = `width=${width},height=${height},left=${left},top=${top}`
+  return window.open(url, 'request-quarters', params)
+}
 
-    requestTransfer: function() {
-      this.reftoken().then(() => {
-        this.quarters
-          .requestTransfer({
-            tokens: 100
-          })
-          .then(t => {
-            console.log(t)
-          })
+// quarters example
+const quarterOptions = {
+  appKey: 'quarters-sdk',
+  appSecret: 'quarter-123456',
+  // quartersURL: 'http://localhost:3000',
+  // apiURL: 'http://localhost:8888/v1/',
+  quartersURL: 'http://quarters.surge.sh',
+  apiURL: 'http://e51e0c82.ngrok.io/v1/'
+}
+const quarters = new Quarters(quarterOptions)
+
+// app
+class App extends React.Component {
+  constructor() {
+    super()
+
+    // state
+    this.state = {
+      refreshToken: null,
+      loading: false,
+      txId: null
+    }
+  }
+
+  componentDidMount() {
+    const refreshToken = window.localStorage.getItem(
+      'quarters_sdk:refresh_token'
+    )
+    if (window.localStorage.getItem('quarters_sdk:refresh_token')) {
+      this.setState({
+        refreshToken: refreshToken,
+        loading: true
+      })
+
+      // set it to quarters
+      quarters.setRefreshToken(refreshToken).then(() => {
+        this.setState({
+          loading: false
+        })
+
+        // load user
+        this.loadUser()
       })
     }
   }
-})
+
+  login = () => {
+    this.setState({
+      loading: true
+    })
+
+    quarters.authorize({
+      success: data => {
+        if (data.code) {
+          quarters
+            .setAuthCode(data.code)
+            .then(response => {
+              // set refresh token
+              this.setState({
+                refreshToken: response.refresh_token,
+                loading: false
+              })
+
+              window.localStorage.setItem(
+                'quarters_sdk:refresh_token',
+                response.refresh_token
+              )
+
+              // load user
+              this.loadUser()
+            })
+            .catch(() => {
+              this.setState({
+                loading: false
+              })
+            })
+        } else {
+          this.setState({
+            loading: false
+          })
+        }
+      }
+      // redirect: true
+    })
+  }
+
+  logout = () => {
+    window.localStorage.removeItem('quarters_sdk:refresh_token')
+    this.setState({
+      refreshToken: null,
+      user: null
+    })
+  }
+
+  loadUser = () => {
+    quarters.me().then(response => {
+      this.setState({
+        user: response
+      })
+    })
+  }
+
+  requestTokens = (tokens = 100) => {
+    this.setState({
+      loading: true
+    })
+
+    quarters
+      .requestTransfer({
+        tokens: tokens,
+        description: 'Just to test SDK'
+      })
+      .then(t => {
+        this.setState({
+          loading: false,
+          requestId: t.id
+        })
+
+        const url = `${quarterOptions.quartersURL}/requests/${t.id}`
+        if (false) {
+          const redirectURI = encodeURIComponent(
+            `${location.protocol}//${location.host}${location.pathname}`
+          )
+          window.location = `${url}?redirect_uri=${redirectURI}`
+        } else {
+          // receive message from popup
+          const receiveMessage = event => {
+            if (event.origin !== quarterOptions.quartersURL) {
+              return
+            }
+
+            event.source.close()
+            const data = JSON.parse(event.data)
+            this.setState({
+              txId: data.txId
+            })
+          }
+          window.addEventListener('message', receiveMessage, false)
+
+          // open popup
+          openPopup(url)
+        }
+      })
+      .catch(() => {
+        this.setState({
+          loading: false
+        })
+      })
+  }
+
+  render() {
+    if (this.state.loading) {
+      return <div className="loader" />
+    }
+
+    if (!this.state.refreshToken) {
+      return <button onClick={this.login}>Login</button>
+    }
+
+    let txDiv = null
+    if (this.state.txId) {
+      txDiv = <div>TX ID: {this.state.txId}</div>
+    }
+
+    const name = this.state.user ? this.state.user.displayName : null
+    return (
+      <div>
+        <div className="container">
+          <div className="row">
+            <button onClick={this.logout}>logout</button>
+            &nbsp; {name}
+          </div>
+        </div>
+        <div className="container">
+          <div className="row">
+            <div className="one-half column">
+              <button
+                className="button-primary"
+                onClick={this.requestTokens.bind(this, 20)}
+              >
+                Buy truck for 20 quarters
+              </button>
+            </div>
+            <div className="one-half column">
+              <button
+                className="button-primary"
+                onClick={this.requestTokens.bind(this, 100)}
+              >
+                Buy fighter plane for 100 quarters
+              </button>
+            </div>
+          </div>
+          {txDiv}
+        </div>
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(<App />, document.getElementById('app'))
 </script>
 </html>
