@@ -52,9 +52,9 @@ const quarterOptions = {
   appKey: 'quarters-sdk',
   appSecret: 'quarter-123456',
   // quartersURL: 'http://localhost:3000',
-  // apiURL: 'http://localhost:8888/v1/',
-  quartersURL: 'http://quarters.surge.sh',
-  apiURL: 'http://e51e0c82.ngrok.io/v1/'
+  // apiURL: 'http://localhost:8888/v1/'
+  quartersURL: 'https://dev.pocketfulofquarters.com',
+  apiURL: 'https://api.dev.pocketfulofquarters.com/v1/'
 }
 const quarters = new Quarters(quarterOptions)
 
@@ -178,11 +178,16 @@ class App extends React.Component {
               return
             }
 
-            event.source.close()
             const data = JSON.parse(event.data)
-            this.setState({
-              txId: data.txId
-            })
+            if (data.txId) {
+              this.setState({
+                txId: data.txId
+              })
+            } else if (data.error) {
+              setTimeout(() => {
+                alert(data.error)
+              })
+            }
           }
           window.addEventListener('message', receiveMessage, false)
 
