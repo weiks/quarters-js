@@ -172,10 +172,21 @@ class App extends React.Component {
           )
           window.location = `${url}?redirect_uri=${redirectURI}`
         } else {
+          let popupWindow = null
+
           // receive message from popup
           const receiveMessage = event => {
             if (event.origin !== quarterOptions.quartersURL) {
               return
+            }
+
+            if (popupWindow) {
+              // close popup window
+              try {
+                popupWindow.close()
+              } catch (e) {
+                console.log(e)
+              }
             }
 
             const data = JSON.parse(event.data)
@@ -186,13 +197,13 @@ class App extends React.Component {
             } else if (data.error) {
               setTimeout(() => {
                 alert(data.error)
-              })
+              }, 100)
             }
           }
           window.addEventListener('message', receiveMessage, false)
 
           // open popup
-          openPopup(url)
+          popupWindow = openPopup(url)
         }
       })
       .catch(() => {
