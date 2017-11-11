@@ -39,11 +39,13 @@
       </div>
       <div class="row">
         <a class="buy-quarters-button"
+          data-widget-type="button"
           data-order-code="1"
           data-amount="20">
           Play with 20 Quarters
         </a>
         <a class="buy-quarters-button"
+          data-widget-type="button"
           data-order-code="2"
           data-button-type="green"
           data-amount="5"
@@ -51,6 +53,7 @@
           Play with 5 Quarters
         </a>
         <a class="buy-quarters-button"
+          data-widget-type="button"
           data-order-code="7"
           data-button-type="red"
           data-button-size="small"
@@ -58,6 +61,7 @@
           Play with 100 Quarters
         </a>
         <button class="buy-quarters-button"
+          data-widget-type="button"
           data-order-code="10"
           data-amount="2"
           data-button-type="green">
@@ -76,7 +80,26 @@
   <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
   <script type="text/babel">
-  const openPopup = (url, width = 850, height = 600) => {
+// Widget callbacks
+var receiveMessage = function(event) {
+  if (event.origin !== 'https://dev.pocketfulofquarters.com') {
+    return
+  }
+
+  var data = JSON.parse(event.data)
+  if (data.error) {
+    // data.message
+  } else if (data.cancel) {
+    // user canceled transfer
+  } else {
+    // data.txId => Ethereum transaction tx id
+    // data.requestId => Request Id to get details about order (/v1/requests/:requestId)
+  }
+}
+// receive message
+window.addEventListener('message', receiveMessage, false)
+
+const openPopup = (url, width = 850, height = 600) => {
   const left = (screen.width - width) / 2
   const top = (screen.height - height) / 4
   const params = `width=${width},height=${height},left=${left},top=${top}`
