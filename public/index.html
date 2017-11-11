@@ -5,6 +5,10 @@
     <title>Quarters SDK Test</title>
   </head>
   <style media="screen">
+  .buy-quarters-button {
+    margin: 10px;
+  }
+
   .loader {
     border: 3px solid black;
     border-top: 3px solid #CCC;
@@ -33,9 +37,41 @@
         <div id="app">
         </div>
       </div>
+      <div class="row">
+        <a class="buy-quarters-button"
+          data-order-code="1"
+          data-amount="20">
+          Play with 20 Quarters
+        </a>
+        <a class="buy-quarters-button"
+          data-order-code="2"
+          data-button-type="green"
+          data-amount="5"
+          data-button-size="large">
+          Play with 5 Quarters
+        </a>
+        <a class="buy-quarters-button"
+          data-order-code="7"
+          data-button-type="red"
+          data-button-size="small"
+          data-amount="100">
+          Play with 100 Quarters
+        </a>
+        <button class="buy-quarters-button"
+          data-order-code="10"
+          data-amount="2"
+          data-button-type="green">
+          Play with 2 Quarters
+        </button>
+      </div>
     </div>
   </body>
-
+  <script
+    src="https://dev.pocketfulofquarters.com/embeds/button.js"
+    data-script-name="quarters-embeds"
+    data-app-id="Lpk5sPrA7P59HFlN7obS"
+    data-app-key="1s4x2v8h3b9ollw1pt2afj8knheamvmvv"
+    charset="utf-8"></script>
   <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
@@ -49,8 +85,11 @@
 
 // quarters example
 const quarterOptions = {
-  appKey: 'quarters-sdk',
-  appSecret: 'quarter-123456',
+  // appKey: 'quarters-sdk',
+  // appSecret: 'quarter-123456',
+
+  appKey: 'Lpk5sPrA7P59HFlN7obS',
+  appSecret: '1s4x2v8h3b9ollw1pt2afj8knheamvmvv',
   // quartersURL: 'http://localhost:3000',
   // apiURL: 'http://localhost:8888/v1/'
   quartersURL: 'https://dev.pocketfulofquarters.com',
