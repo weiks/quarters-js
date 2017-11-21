@@ -78,35 +78,64 @@ export default class Quarters {
   /**
    * Authorize user with oauth
    *
-   * @param options object
-   *        - redirect: boolean. Default false. If set true it redirects instead of popup
-   *        - success: function. To get `code` code from child oauth popup (used when redirect is false)
+   * @param type: string. Default 'iframe'. Possible values: 'iframe', 'popup' and 'redirect'
+   * @param success: function. To get `code` code from child oauth popup/iframe
    */
-  authorize(options = {}) {
+  authorize(type = 'iframe', success = () => {}) {
     const oauthURL = this.options.oauthURL
     const url = `${oauthURL}/oauth/authorize?response_type=code&client_id=${this
-      .options.appKey}`
-    if (options.redirect) {
+      .options.appKey}&inline=true`
+
+    if (type === 'redirect') {
       const redirectURI = encodeURIComponent(
         `${location.protocol}//${location.host}${location.pathname}`
       )
       window.location.href = `${url}&redirect_uri=${redirectURI}`
-    } else {
-      // receive message from popup
-      const receiveMessage = event => {
-        if (event.origin !== this.options.quartersURL) {
-          return
-        }
+      return
+    }
 
-        event.source.close()
-        const data = JSON.parse(event.data)
-        options.success && options.success(data) // success method on data
+    // receive message from popup/iframe
+    const receiveMessage = event => {
+      if (event.origin !== this.options.quartersURL) {
+        return
       }
-      window.addEventListener('message', receiveMessage, false)
 
+      if (event.source && event.source.close) {
+        event.source.close()
+      }
+      const data = JSON.parse(event.data)
+
+      // remove attached iframe
+      if (data.frameId) {
+        const frameEl = document.getElementById(data.frameId)
+        if (frameEl) {
+          document.body.removeChild(frameEl)
+        }
+      }
+
+      success(data) // success method on data
+    }
+    window.addEventListener('message', receiveMessage, false)
+
+    if (type === 'popup') {
       // open popup
       return openPopup(url)
     }
+
+    // iframe
+    const frameId = `quarters_iframe_${Date.now()}`
+    const iframeURL = `${url}&frame_id=${frameId}`
+    const f = document.createElement('IFRAME')
+    f.setAttribute('src', iframeURL)
+    f.setAttribute('id', frameId)
+    f.setAttribute(
+      'style',
+      'position: fixed; width: 100%; height: 100%; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; border: 0px none transparent; background-color: transparent;'
+    )
+    f.setAttribute('frameBorder', '0')
+
+    // append child
+    document.body.appendChild(f)
   }
 
   setAuthCode(code) {

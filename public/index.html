@@ -71,7 +71,8 @@
     </div>
   </body>
   <script
-    src="https://dev.pocketfulofquarters.com/embeds/button.js"
+    src1="https://dev.pocketfulofquarters.com/embeds/button.js"
+    src="http://localhost:3000/embeds/button.js"
     data-script-name="quarters-embeds"
     data-app-id="Lpk5sPrA7P59HFlN7obS"
     data-app-key="1s4x2v8h3b9ollw1pt2afj8knheamvmvv"
@@ -113,10 +114,10 @@ const quarterOptions = {
 
   appKey: 'Lpk5sPrA7P59HFlN7obS',
   appSecret: '1s4x2v8h3b9ollw1pt2afj8knheamvmvv',
-  // quartersURL: 'http://localhost:3000',
-  // apiURL: 'http://localhost:8888/v1/'
-  quartersURL: 'https://dev.pocketfulofquarters.com',
-  apiURL: 'https://api.dev.pocketfulofquarters.com/v1/'
+  quartersURL: 'http://localhost:3000',
+  apiURL: 'http://localhost:8888/v1/'
+  // quartersURL: 'https://dev.pocketfulofquarters.com',
+  // apiURL: 'https://api.dev.pocketfulofquarters.com/v1/'
 }
 const quarters = new Quarters(quarterOptions)
 
@@ -160,38 +161,37 @@ class App extends React.Component {
       loading: true
     })
 
-    quarters.authorize({
-      success: data => {
-        if (data.code) {
-          quarters
-            .setAuthCode(data.code)
-            .then(response => {
-              // set refresh token
-              this.setState({
-                refreshToken: response.refresh_token,
-                loading: false
-              })
-
-              window.localStorage.setItem(
-                'quarters_sdk:refresh_token',
-                response.refresh_token
-              )
-
-              // load user
-              this.loadUser()
+    // authorize with iframe
+    quarters.authorize('iframe', data => {
+      if (data.code) {
+        quarters
+          .setAuthCode(data.code)
+          .then(response => {
+            // set refresh token
+            this.setState({
+              refreshToken: response.refresh_token,
+              loading: false
             })
-            .catch(() => {
-              this.setState({
-                loading: false
-              })
-            })
-        } else {
-          this.setState({
-            loading: false
+
+            window.localStorage.setItem(
+              'quarters_sdk:refresh_token',
+              response.refresh_token
+            )
+
+            // load user
+            this.loadUser()
           })
-        }
+          .catch((e) => {
+            console.log(e)
+            this.setState({
+              loading: false
+            })
+          })
+      } else {
+        this.setState({
+          loading: false
+        })
       }
-      // redirect: true
     })
   }
 
