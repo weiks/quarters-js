@@ -41,7 +41,7 @@
         <a class="buy-quarters-button"
           data-widget-type="button"
           data-order-code="1"
-          data-amount="20">
+          data-amount="3330">
           Play with 20 Quarters
         </a>
         <a class="buy-quarters-button"
@@ -71,8 +71,8 @@
     </div>
   </body>
   <script
-    src1="https://dev.pocketfulofquarters.com/embeds/button.js"
-    src="http://localhost:3000/embeds/button.js"
+    src="https://dev.pocketfulofquarters.com/embeds/button.js"
+    src1="http://localhost:3000/embeds/button.js"
     data-script-name="quarters-embeds"
     data-app-id="Lpk5sPrA7P59HFlN7obS"
     data-app-key="1s4x2v8h3b9ollw1pt2afj8knheamvmvv"
@@ -227,46 +227,60 @@ class App extends React.Component {
           requestId: t.id
         })
 
-        const url = `${quarterOptions.quartersURL}/requests/${t.id}`
-        if (false) {
-          const redirectURI = encodeURIComponent(
-            `${location.protocol}//${location.host}${location.pathname}`
-          )
-          window.location = `${url}?redirect_uri=${redirectURI}`
-        } else {
-          let popupWindow = null
+        // authorize transfer
+        quarters.authorizeTransfer(t.id, 'iframe', (data) => {
+          const data = JSON.parse(event.data)
+           if (data.txId) {
+             this.setState({
+               txId: data.txId
+             })
+           } else if (data.error) {
+             setTimeout(() => {
+               alert(data.error)
+             }, 100)
+           }
+        })
 
-          // receive message from popup
-          const receiveMessage = event => {
-            if (event.origin !== quarterOptions.quartersURL) {
-              return
-            }
-
-            if (popupWindow) {
-              // close popup window
-              try {
-                popupWindow.close()
-              } catch (e) {
-                console.log(e)
-              }
-            }
-
-            const data = JSON.parse(event.data)
-            if (data.txId) {
-              this.setState({
-                txId: data.txId
-              })
-            } else if (data.error) {
-              setTimeout(() => {
-                alert(data.error)
-              }, 100)
-            }
-          }
-          window.addEventListener('message', receiveMessage, false)
-
-          // open popup
-          popupWindow = openPopup(url)
-        }
+        // const url = `${quarterOptions.quartersURL}/requests/${t.id}`
+        // if (false) {
+        //   const redirectURI = encodeURIComponent(
+        //     `${location.protocol}//${location.host}${location.pathname}`
+        //   )
+        //   window.location = `${url}?redirect_uri=${redirectURI}`
+        // } else {
+        //   let popupWindow = null
+        //
+        //   // receive message from popup
+        //   const receiveMessage = event => {
+        //     if (event.origin !== quarterOptions.quartersURL) {
+        //       return
+        //     }
+        //
+        //     if (popupWindow) {
+        //       // close popup window
+        //       try {
+        //         popupWindow.close()
+        //       } catch (e) {
+        //         console.log(e)
+        //       }
+        //     }
+        //
+        //     const data = JSON.parse(event.data)
+        //     if (data.txId) {
+        //       this.setState({
+        //         txId: data.txId
+        //       })
+        //     } else if (data.error) {
+        //       setTimeout(() => {
+        //         alert(data.error)
+        //       }, 100)
+        //     }
+        //   }
+        //   window.addEventListener('message', receiveMessage, false)
+        //
+        //   // open popup
+        //   popupWindow = openPopup(url)
+        // }
       })
       .catch(() => {
         this.setState({

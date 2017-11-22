@@ -75,17 +75,7 @@ export default class Quarters {
     return obj
   }
 
-  /**
-   * Authorize user with oauth
-   *
-   * @param type: string. Default 'iframe'. Possible values: 'iframe', 'popup' and 'redirect'
-   * @param success: function. To get `code` code from child oauth popup/iframe
-   */
-  authorize(type = 'iframe', success = () => {}) {
-    const oauthURL = this.options.oauthURL
-    const url = `${oauthURL}/oauth/authorize?response_type=code&client_id=${this
-      .options.appKey}&inline=true`
-
+  _requestFromQuarters(url, type, success) {
     if (type === 'redirect') {
       const redirectURI = encodeURIComponent(
         `${location.protocol}//${location.host}${location.pathname}`
@@ -136,6 +126,20 @@ export default class Quarters {
 
     // append child
     document.body.appendChild(f)
+  }
+
+  /**
+   * Authorize user with oauth
+   *
+   * @param type: string. Default 'iframe'. Possible values: 'iframe', 'popup' and 'redirect'
+   * @param success: function. To get `code` code from child oauth popup/iframe
+   */
+  authorize(type = 'iframe', success = () => {}) {
+    const oauthURL = this.options.oauthURL
+    const url = `${oauthURL}/oauth/authorize?response_type=code&client_id=${this
+      .options.appKey}&inline=true`
+
+    return this._requestFromQuarters(url, type, success)
   }
 
   setAuthCode(code) {
@@ -205,5 +209,20 @@ export default class Quarters {
     return this.axiosObject
       .post('/requests', payload)
       .then(response => response.data)
+  }
+
+  /**
+     * Authorize transfer request
+     *
+     * @param requestId: string. Request id
+     * @param type: string. Default 'iframe'. Possible values: 'iframe', 'popup' and 'redirect'
+     * @param success: function. To get data from iframe/popup
+     */
+  authorizeTransfer(requestId, type = 'iframe', success = () => {}) {
+    const oauthURL = this.options.oauthURL
+    const url = `${oauthURL}/requests/${requestId}?client_id=${this.options
+      .appKey}&inline=true`
+
+    return this._requestFromQuarters(url, type, success)
   }
 }
