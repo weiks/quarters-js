@@ -229,16 +229,15 @@ class App extends React.Component {
 
         // authorize transfer
         quarters.authorizeTransfer(t.id, 'iframe', (data) => {
-          const data = JSON.parse(event.data)
-           if (data.txId) {
-             this.setState({
-               txId: data.txId
-             })
-           } else if (data.error) {
-             setTimeout(() => {
-               alert(data.error)
-             }, 100)
-           }
+          if (data.txId) {
+           this.setState({
+             txId: data.txId
+           })
+          } else if (data.error) {
+           setTimeout(() => {
+             alert(data.error)
+           }, 100)
+          }
         })
 
         // const url = `${quarterOptions.quartersURL}/requests/${t.id}`
