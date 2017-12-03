@@ -104,7 +104,12 @@ export default class Quarters {
       }
 
       success(data) // success method on data
+
+      // remove event listener
+      window.removeEventListener('message', receiveMessage)
     }
+
+    // add event listener
     window.addEventListener('message', receiveMessage, false)
 
     if (type === 'popup') {
