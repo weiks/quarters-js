@@ -30,6 +30,9 @@ export default class Quarters {
 
     // axios object
     this.axiosObject = this._getAxiosObject()
+
+    // account object cache
+    this.account = null
   }
 
   _getAxiosObject(apiToken) {
@@ -198,6 +201,35 @@ export default class Quarters {
   // user details
   me() {
     return this.axiosObject.get('/me').then(response => response.data)
+  }
+
+  // user account
+  getAccount() {
+    if (this.account) {
+      return new Promise(resolve => {
+        resolve(this.account)
+      })
+    }
+
+    return this.axiosObject
+      .get(`/accounts`)
+      .then(response => response.data)
+      .then(accounts => {
+        if (accounts.length > 0) {
+          this.account = accounts[0]
+        }
+
+        return this.account
+      })
+  }
+
+  // user balance
+  getBalance() {
+    return this.getAccount()
+      .then(account => {
+        return this.axiosObject.get(`/accounts/${account.address}/balance`)
+      })
+      .then(response => response.data)
   }
 
   // request transfer from quarter server
