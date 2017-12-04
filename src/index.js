@@ -239,7 +239,11 @@ export default class Quarters {
     }
 
     const payload = {
-      tokens: parseInt(data.tokens)
+      tokens: parseInt(data.tokens),
+      description: data.description,
+
+      // app id (required)
+      appId: this.options.appKey
     }
 
     // request tokens
