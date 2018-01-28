@@ -9,19 +9,19 @@ const openPopup = (url, width = 850, height = 600) => {
 
 export default class Quarters {
   constructor(options = {}) {
-    if (!options.appKey) {
-      throw new Error('APP KEY is required.')
+    if (!options.appId) {
+      throw new Error('APP ID is required.')
     }
 
-    if (!options.appSecret) {
-      throw new Error('APP SECRET is required.')
+    if (!options.appKey) {
+      throw new Error('APP KEY is required.')
     }
 
     // options
     const quartersURL = options.quartersURL || 'https://pocketfulofquarters.com'
     this.options = {
+      appId: options.appId,
       appKey: options.appKey,
-      appSecret: options.appSecret,
       quartersURL: quartersURL,
       redirectURL: `${quartersURL}/oauth/javascript_sdk_redirect`,
       oauthURL: options.oauthURL || quartersURL,
@@ -145,15 +145,15 @@ export default class Quarters {
   authorize(type = 'iframe', success = () => {}) {
     const oauthURL = this.options.oauthURL
     const url = `${oauthURL}/oauth/authorize?response_type=code&client_id=${this
-      .options.appKey}&inline=true`
+      .options.appId}&inline=true`
 
     return this._requestFromQuarters(url, type, success)
   }
 
   setAuthCode(code) {
     const data = {
-      client_id: this.options.appKey,
-      client_secret: this.options.appSecret,
+      client_id: this.options.appId,
+      client_secret: this.options.appKey,
       grant_type: 'authorization_code',
       code: code
     }
@@ -183,8 +183,8 @@ export default class Quarters {
     }
 
     const data = {
-      client_id: this.options.appKey,
-      client_secret: this.options.appSecret,
+      client_id: this.options.appId,
+      client_secret: this.options.appKey,
       grant_type: 'refresh_token',
       refresh_token: this.refreshToken
     }
@@ -243,7 +243,7 @@ export default class Quarters {
       description: data.description,
 
       // app id (required)
-      appId: this.options.appKey
+      appId: this.options.appId
     }
 
     // request tokens
@@ -262,7 +262,7 @@ export default class Quarters {
   authorizeTransfer(requestId, type = 'iframe', success = () => {}) {
     const oauthURL = this.options.oauthURL
     const url = `${oauthURL}/requests/${requestId}?client_id=${this.options
-      .appKey}&inline=true`
+      .appId}&inline=true`
 
     return this._requestFromQuarters(url, type, success)
   }

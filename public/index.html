@@ -29,54 +29,61 @@
   }
 
   </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
   <script src="/Quarters.min.js" charset="utf-8"></script>
   <body>
     <div class="container">
-      <div class="row">
-        <div id="app">
+      <div class="row justify-content-center my-5">
+        <div id="app" class="col-md-6">
         </div>
       </div>
-      <div class="row">
-        <a class="buy-quarters-button"
-          data-widget-type="button"
-          data-order-code="1"
-          data-amount="3330">
-          Play with 20 Quarters
-        </a>
-        <a class="buy-quarters-button"
-          data-widget-type="button"
-          data-order-code="2"
-          data-button-type="green"
-          data-amount="5"
-          data-button-size="large">
-          Play with 5 Quarters
-        </a>
-        <a class="buy-quarters-button"
-          data-widget-type="button"
-          data-order-code="7"
-          data-button-type="red"
-          data-button-size="small"
-          data-amount="100">
-          Play with 100 Quarters
-        </a>
-        <button class="buy-quarters-button"
-          data-widget-type="button"
-          data-order-code="10"
-          data-amount="2"
-          data-button-type="green">
-          Play with 2 Quarters
-        </button>
+      <div class="row justify-content-center my-5">
+        <div class="col-md-8">
+          <a class="buy-quarters-button btn"
+            data-widget-type="button"
+            data-order-code="1"
+            data-amount="3330">
+            Play with 3330 Quarters
+          </a>
+          <a class="buy-quarters-button btn"
+            data-widget-type="button"
+            data-order-code="2"
+            data-button-type="green"
+            data-amount="5"
+            data-button-size="large">
+            Play with 5 Quarters
+          </a>
+          <a class="buy-quarters-button btn"
+            data-widget-type="button"
+            data-order-code="7"
+            data-button-type="red"
+            data-button-size="small"
+            data-amount="100">
+            Play with 100 Quarters
+          </a>
+          <button class="buy-quarters-button btn"
+            data-widget-type="button"
+            data-order-code="10"
+            data-amount="2"
+            data-button-type="green">
+            Play with 2 Quarters
+          </button>
+        </div>
       </div>
     </div>
   </body>
   <script
     src="https://dev.pocketfulofquarters.com/embeds/button.js"
     src1="http://localhost:3000/embeds/button.js"
+    src1="http://192.168.0.102:3000/embeds/button.js"
     data-script-name="quarters-embeds"
     data-app-id="Lpk5sPrA7P59HFlN7obS"
     data-app-key="1s4x2v8h3b9ollw1pt2afj8knheamvmvv"
     charset="utf-8"></script>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
   <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
@@ -109,12 +116,13 @@ const openPopup = (url, width = 850, height = 600) => {
 
 // quarters example
 const quarterOptions = {
-  // appKey: 'quarters-sdk',
-  // appSecret: 'quarter-123456',
+  // appId: 'quarters-sdk',
+  // appKey: 'quarter-123456',
 
-  appKey: 'Lpk5sPrA7P59HFlN7obS',
-  appSecret: '1s4x2v8h3b9ollw1pt2afj8knheamvmvv',
-  // quartersURL: 'http://localhost:3000',
+  appId: 'Lpk5sPrA7P59HFlN7obS',
+  appKey: '1s4x2v8h3b9ollw1pt2afj8knheamvmvv',
+  quartersURL: 'http://localhost:3000',
+  // quartersURL: 'http://192.168.0.102:3000',
   // apiURL: 'http://localhost:8888/v1/'
   quartersURL: 'https://dev.pocketfulofquarters.com',
   apiURL: 'https://api.dev.pocketfulofquarters.com/v1/'
@@ -294,7 +302,7 @@ class App extends React.Component {
     }
 
     if (!this.state.refreshToken) {
-      return <button onClick={this.login}>Login</button>
+      return <button onClick={this.login} className="btn btn-info">Login</button>
     }
 
     let txDiv = null
@@ -307,7 +315,7 @@ class App extends React.Component {
       <div>
         <div className="container">
           <div className="row">
-            <button onClick={this.logout}>logout</button>
+            <button onClick={this.logout} className="btn btn-outline-primary">logout</button>
             &nbsp; {name}
           </div>
         </div>
@@ -315,7 +323,7 @@ class App extends React.Component {
           <div className="row">
             <div className="one-half column">
               <button
-                className="button-primary"
+                className="btn btn-primary"
                 onClick={this.requestTokens.bind(this, 20)}
               >
                 Buy truck for 20 quarters
@@ -323,7 +331,7 @@ class App extends React.Component {
             </div>
             <div className="one-half column">
               <button
-                className="button-primary"
+                className="btn btn-primary"
                 onClick={this.requestTokens.bind(this, 100)}
               >
                 Buy fighter plane for 100 quarters
