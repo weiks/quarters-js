@@ -2,7 +2,7 @@
   "name": "quarters-js",
   "version": "0.0.1",
   "description": "Quarter sdk",
-  "main": "lib/library.js",
+  "main": "lib/Quarters.min.js",
   "scripts": {
     "build": "webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",
