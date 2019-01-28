@@ -89,14 +89,20 @@ export default class Quarters {
 
     // receive message from popup/iframe
     const receiveMessage = event => {
-      if (event.origin !== this.options.quartersURL) {
+      let data = null
+      try {
+        data = JSON.parse(event.data)
+      } catch (e) {
+        console.log(e)
+      }
+
+      if (event.origin !== this.options.quartersURL || !data) {
         return
       }
 
       if (event.source && event.source.close) {
         event.source.close()
       }
-      const data = JSON.parse(event.data)
 
       // remove attached iframe
       if (data.frameId) {
