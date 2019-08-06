@@ -134,7 +134,7 @@ export default class Quarters {
     f.setAttribute('id', frameId)
     f.setAttribute(
       'style',
-      'position: fixed; width: 100%; height: 100%; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; border: 0px none transparent; background-color: transparent;'
+      'position: fixed; max-width: 440px; width: 100%; height: 100%; top: 15vh; left: 0; right: 0; bottom: 0; margin: 0 auto; z-index: 1000; border: 0px none transparent; background-color: transparent; box-shadow: 0 0 300px 50px rgba(254, 221, 30, 0.5);'
     )
     f.setAttribute('frameBorder', '0')
 
