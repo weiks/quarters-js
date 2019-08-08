@@ -131,7 +131,6 @@ export default class Quarters {
     const iframeURL = `${url}&frame_id=${frameId}`
     const f = document.createElement('IFRAME')
     f.setAttribute('src', iframeURL)
-    f.setAttribute('id', frameId)
     f.setAttribute(
       'style',
       'position: fixed; max-width: 440px; max-height: calc(100% - 30vh); width: 100%; height: 100%; top: 15vh; left: 0; right: 0; bottom: 0; margin: 0 auto; z-index: 1000; border: 0px none transparent; background-color: transparent;'
@@ -139,6 +138,7 @@ export default class Quarters {
     f.setAttribute('frameBorder', '0')
 
     const d = document.createElement('DIV')
+    d.setAttribute('id', frameId)
     d.setAttribute(
       'style',
       'position: fixed; top: 0; width: 100%; height: 100%; z-index: 999; background: linear-gradient(90deg, rgba(254,221,30,0) 0%, rgba(254,221,30,0.5) 50%, rgba(254,221,30,0) 100%);'
