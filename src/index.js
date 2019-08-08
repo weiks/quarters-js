@@ -276,17 +276,29 @@ export default class Quarters {
   }
 
   /**
-     * Authorize transfer request
-     *
-     * @param requestId: string. Request id
-     * @param type: string. Default 'iframe'. Possible values: 'iframe', 'popup' and 'redirect'
-     * @param success: function. To get data from iframe/popup
-     */
+   * Authorize transfer request
+   *
+   * @param requestId: string. Request id
+   * @param type: string. Default 'iframe'. Possible values: 'iframe', 'popup' and 'redirect'
+   * @param success: function. To get data from iframe/popup
+   */
   authorizeTransfer(requestId, type = 'iframe', success = () => {}) {
     const oauthURL = this.options.oauthURL
     const url = `${oauthURL}/requests/${requestId}?client_id=${this.options
       .appId}&inline=true`
 
+    return this._requestFromQuarters(url, type, success)
+  }
+
+  /**
+   * Log out users if the dev has auto authorize enabled
+   *
+   * @param type: string. Default 'iframe'. Possible values: 'iframe', 'popup' and 'redirect'
+   * @param success: function. On successful logout
+   */
+  logout(type = 'iframe', success = () => {}) {
+    const url = `${this.options.quartersURL}/logout?client_id=${this.options
+      .appId}&inline=true`
     return this._requestFromQuarters(url, type, success)
   }
 }
