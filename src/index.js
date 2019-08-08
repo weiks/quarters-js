@@ -147,14 +147,20 @@ export default class Quarters {
    *
    * @param type: string. Default 'iframe'. Possible values: 'iframe', 'popup' and 'redirect'
    * @param success: function. To get `code` code from child oauth popup/iframe
+   * @param forceSignup: boolean. Force users to sign up
+   * @param autoAuthorize: boolean. Enable auto authorize
    */
-  authorize(type = 'iframe', success = () => {}, forceSignup = false) {
+  authorize(type = 'iframe', success = () => {}, forceSignup = false, autoAuthorize = false) {
     const oauthURL = this.options.oauthURL
     let url = `${oauthURL}/oauth/authorize?response_type=code&client_id=${this
       .options.appId}&inline=true`
 
     if (forceSignup) {
       url += '&force_signup=true'
+    }
+
+    if (autoAuthorize) {
+      url += '&auto_authorize=true'
     }
 
     return this._requestFromQuarters(url, type, success)
