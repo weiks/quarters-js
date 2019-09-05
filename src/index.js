@@ -1,4 +1,15 @@
 import axios from 'axios'
+import firebase from 'firebase'
+import 'firebase/firestore'
+
+const firebaseProductionOptions = {
+  apiKey: 'AIzaSyCjTofzuvmR1n3MAPSnMcf8rSIA2fx1FzU',
+  authDomain: 'quarters-dev.firebaseapp.com',
+  databaseURL: 'https://quarters-dev.firebaseio.com',
+  projectId: 'quarters-dev',
+  storageBucket: 'quarters-dev.appspot.com',
+  messagingSenderId: '373371135958'
+}
 
 const openPopup = (url, width = 850, height = 600) => {
   const left = (screen.width - width) / 2
@@ -25,8 +36,11 @@ export default class Quarters {
       quartersURL: quartersURL,
       redirectURL: `${quartersURL}/oauth/javascript_sdk_redirect`,
       oauthURL: options.oauthURL || quartersURL,
-      apiURL: options.apiURL || 'https://api.pocketfulofquarters.com/'
+      apiURL: options.apiURL || 'https://api.pocketfulofquarters.com/',
+      firebase: options.firebase || firebaseProductionOptions
     }
+
+    this.firebase = firebase.initializeApp(this.options.firebase)
 
     // axios object
     this.axiosObject = this._getAxiosObject()
@@ -253,6 +267,24 @@ export default class Quarters {
         return this.axiosObject.get(`/accounts/${account.address}/balance`)
       })
       .then(response => response.data)
+  }
+
+  // on balance update
+  onBalanceUpdate(cb) {
+    return this
+            .getAccount()
+            .then(account => {
+              return this.firebase
+                .firestore()
+                .collection('balances')
+                .doc(account.address)
+                .onSnapshot(snapshot => {
+                  const balances = snapshot.data()
+                  if (balances) {
+                    cb(balances)
+                  }
+                })
+            })
   }
 
   // request transfer from quarter server
